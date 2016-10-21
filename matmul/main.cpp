@@ -63,8 +63,6 @@ int main(void)
    queue.enqueueWriteBuffer(Mr, CL_TRUE, 0, get_size(M.row_ptr), &M.row_ptr[0]);
    queue.enqueueWriteBuffer(Mc, CL_TRUE, 0, get_size(M.col_idx), &M.col_idx[0]);
    queue.enqueueWriteBuffer(V, CL_TRUE, 0, get_size(vec), &vec[0]);
-   const double zero = 0.0;
-   queue.enqueueFillBuffer(R, &zero, 0, get_size(ret));
 
    // read in kernel source
    std::ifstream sourceFile("matmul.cl");
@@ -89,7 +87,7 @@ int main(void)
    matmul_kernel.setArg(4, R);
 
    cl::NDRange global(vec.size());
-   cl::NDRange local(16);
+   cl::NDRange local(1);
 
    queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, local);
    queue.enqueueReadBuffer(R, CL_TRUE, 0, get_size(ret), &ret[0]);
