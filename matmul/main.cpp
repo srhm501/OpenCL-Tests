@@ -25,8 +25,8 @@ size_t get_size(const std::vector<T> &v)
 // Compressed sparse row format matrix
 struct CSRmatrix {
    std::vector<double> vals;
-   std::vector<int> row_ptr;
-   std::vector<int> col_idx;
+   std::vector<unsigned int> row_ptr;
+   std::vector<unsigned int> col_idx;
 };
 
 int main(void)
