@@ -6,6 +6,13 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <numeric>
+#include <ctime>
+
+double get_cpu_time(void)
+{
+   return double(clock()) / CLOCKS_PER_SEC;
+}
 
 template <typename T>
 void print_vec(const std::vector<T> &v)
@@ -29,16 +36,50 @@ struct CSRmatrix {
    std::vector<cl_uint> col_idx;
 };
 
+CSRmatrix gen_CSRmatrix(const std::vector<std::vector<double>> &M)
+{
+   size_t isize = M.size();
+   size_t jsize = M[0].size();
+   CSRmatrix ret;
+   ret.row_ptr.resize(jsize+1);
+   ret.row_ptr[0] = 0;
+   
+   for (size_t i=0; i<isize; ++i) {
+      unsigned nnz = 0;
+      for (size_t j=0; j<jsize; ++j) {
+         if (M[i][j] != 0.0) {
+            ++nnz;
+            ret.vals.push_back(M[i][j]);
+            ret.row_ptr[i+1] = ret.row_ptr[i] + nnz;
+            ret.col_idx.push_back(j);
+         }
+      }
+   }
+   return ret;
+}
+
 int main(void)
 {
-   // init host memory
-   const CSRmatrix M = {  // [ 0 0 0 0 ]
-      {5, 8, 3, 6},       // [ 5 8 0 0 ]
-      {0, 0, 2, 3, 4},    // [ 0 0 3 0 ]
-      {0, 1, 2, 1}};      // [ 0 6 0 0 ]
+   const unsigned nelems = 10000;
 
-   const std::vector<cl_double> vec = {1, 2, 3, 4};
+   CSRmatrix M;
+   {
+      std::vector<std::vector<double>> dense_matrix(nelems, std::vector<double>(nelems));
+      for (unsigned i=0; i<nelems; ++i) {
+         for (unsigned j=0; j<nelems; ++j) {
+            dense_matrix[i][j] = (i + j + 1) * 0.000000003;
+         }
+      }
+      M = gen_CSRmatrix(dense_matrix);
+   }
+
+   std::vector<cl_double> vec(nelems);
+   std::iota(std::begin(vec), std::end(vec), 1);
+
    std::vector<cl_double> ret(vec.size());
+
+   // start timing OpenCL
+   double cpu_t0 = get_cpu_time();
 
    // set up OpenCL platform
    std::vector<cl::Platform> platforms;
@@ -92,7 +133,11 @@ int main(void)
    queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, local);
    queue.enqueueReadBuffer(R, CL_TRUE, 0, get_size(ret), &ret[0]);
 
+   double cpu_t1 = get_cpu_time();
+
    print_vec(ret);
+
+   std::cout << "CPU time: " << cpu_t1 - cpu_t0 << std::endl;
 
    return EXIT_SUCCESS;
 }
