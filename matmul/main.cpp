@@ -13,7 +13,7 @@ double get_wall_time(void)
 {
    timeval time;
    gettimeofday(&time, NULL);
-   return (time.tv_sec + time.tv_usec) * 0.000001;
+   return time.tv_sec + (time.tv_usec * 0.000001);
 }
 
 template <typename T>
@@ -81,7 +81,7 @@ int main(void)
    std::vector<cl_double> ret(vec.size());
 
    // start timing OpenCL
-   double cpu_t0 = get_wall_time();
+   double wall_t0 = get_wall_time();
 
    // set up OpenCL platform
    std::vector<cl::Platform> platforms;
@@ -135,11 +135,11 @@ int main(void)
    queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, local);
    queue.enqueueReadBuffer(R, CL_TRUE, 0, get_size(ret), &ret[0]);
 
-   double cpu_t1 = get_wall_time();
+   double wall_t1 = get_wall_time();
 
    print_vec(ret);
 
-   std::cout << "Wall time: " << cpu_t1 - cpu_t0 << std::endl;
+   std::cout << "Wall time: " << wall_t1 - wall_t0 << std::endl;
 
    return EXIT_SUCCESS;
 }
