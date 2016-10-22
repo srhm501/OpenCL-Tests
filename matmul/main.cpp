@@ -137,8 +137,6 @@ int main(void)
 
    double wall_t1 = get_wall_time();
 
-   print_vec(ret);
-
    std::cout << "Wall time: " << wall_t1 - wall_t0 << std::endl;
 
    return EXIT_SUCCESS;
