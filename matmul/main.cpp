@@ -24,9 +24,9 @@ size_t get_size(const std::vector<T> &v)
 
 // Compressed sparse row format matrix
 struct CSRmatrix {
-   std::vector<double> vals;
-   std::vector<unsigned int> row_ptr;
-   std::vector<unsigned int> col_idx;
+   std::vector<cl_double> vals;
+   std::vector<cl_uint> row_ptr;
+   std::vector<cl_uint> col_idx;
 };
 
 int main(void)
@@ -37,8 +37,8 @@ int main(void)
       {0, 0, 2, 3, 4},    // [ 0 0 3 0 ]
       {0, 1, 2, 1}};      // [ 0 6 0 0 ]
 
-   const std::vector<double> vec = {1, 2, 3, 4};
-   std::vector<double> ret(vec.size());
+   const std::vector<cl_double> vec = {1, 2, 3, 4};
+   std::vector<cl_double> ret(vec.size());
 
    // set up OpenCL platform
    std::vector<cl::Platform> platforms;
