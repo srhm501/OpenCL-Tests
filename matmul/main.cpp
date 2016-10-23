@@ -12,8 +12,8 @@
 double get_wall_time(void)
 {
    timeval time;
-   gettimeofday(&time, NULL);
-   return time.tv_sec + (time.tv_usec * 0.000001);
+   gettimeofday(&time, nullptr);
+   return time.tv_sec + (time.tv_usec * 1e-6);
 }
 
 template <typename T>
@@ -92,7 +92,7 @@ int main(void)
 
    cl::Context context(devices);
 
-   cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
+   cl::CommandQueue queue = cl::CommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE);
 
    // allocate device memory
    cl::Buffer Mv = cl::Buffer(context, CL_MEM_READ_ONLY, get_size(M.vals));
@@ -132,12 +132,21 @@ int main(void)
    cl::NDRange global(vec.size());
    cl::NDRange local(1);
 
-   queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, local);
+   cl::Event event;
+   queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, local, nullptr, &event);
    queue.enqueueReadBuffer(R, CL_TRUE, 0, get_size(ret), &ret[0]);
+
+   event.waitForEvents({event});
+   queue.finish();
+
+   cl_ulong k_t0, k_t1;
+   event.getProfilingInfo(CL_PROFILING_COMMAND_START, &k_t0);
+   event.getProfilingInfo(CL_PROFILING_COMMAND_END, &k_t1);
 
    double wall_t1 = get_wall_time();
 
    std::cout << "Wall time: " << wall_t1 - wall_t0 << std::endl;
+   std::cout << "Kernel time: " << (k_t1 - k_t0)*1e-9 << std::endl;
 
    return EXIT_SUCCESS;
 }
