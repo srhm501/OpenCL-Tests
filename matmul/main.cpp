@@ -27,9 +27,8 @@ void print_vec(const std::vector<T> &v)
 template <typename T>
 size_t get_size(const std::vector<T> &v)
 {
-   return v.size()*sizeof(v[0]);
+   return v.size()*sizeof(T);
 }
-
 
 // Compressed sparse row format matrix
 struct CSRmatrix {
@@ -130,10 +129,9 @@ int main(void)
    matmul_kernel.setArg(4, R);
 
    cl::NDRange global(vec.size());
-   cl::NDRange local(1);
 
    cl::Event event;
-   queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, local, nullptr, &event);
+   queue.enqueueNDRangeKernel(matmul_kernel, cl::NullRange, global, cl::NullRange, nullptr, &event);
    queue.enqueueReadBuffer(R, CL_TRUE, 0, get_size(ret), &ret[0]);
 
    event.waitForEvents({event});
