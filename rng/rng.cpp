@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdint>
 
+// coefficients for MT19937
 const uint32_t w = 32;
 const uint32_t n = 624;
 const uint32_t m = 397;
@@ -17,7 +18,11 @@ const uint32_t l = 18;
 const uint32_t lower_mask = (1ull << r) - 1;
 const uint32_t upper_mask = (~lower_mask) & ((1ull << w) - 1);
 
+// MT state array
 uint32_t MT[n];
+
+// how many numbers generated after twist
+// n+1 => need to seed, n => need to twist
 uint32_t index = n+1;
 
 void seed_mt(const uint32_t seed)
