@@ -47,10 +47,7 @@ public:
 
       for (unsigned i=0; i<v.size(); ++i)
          for (unsigned j=0; j<v.size(); ++j)
-         {
-            std::cout << i << ' ' << j << ' ' << this->at(i,j) << std::endl;
             ret[i] += this->at(i,j)*v[j];
-         }
 
       return ret;
    }
