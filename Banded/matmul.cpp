@@ -42,11 +42,11 @@ public:
    }
 
    std::vector<T> operator*(const std::vector<T> &v) const
-   {
-      std::vector<T> ret(v.size(), 0);
+   {      
+      std::vector<T> ret(m_m, 0);
 
-      for (unsigned i=0; i<v.size(); ++i)
-         for (unsigned j=0; j<v.size(); ++j)
+      for (unsigned i=0; i<m_n; ++i)
+         for (unsigned j=0; j<m_m; ++j)
             ret[i] += this->at(i,j)*v[j];
 
       return ret;
